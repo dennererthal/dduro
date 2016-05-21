@@ -100,11 +100,9 @@ public class MainActivity extends AppCompatActivity
         Bitmap pic = (Bitmap) data.getExtras().get("data");
         //iv_camera.setImageBitmap(pic);
 
-        User usuario = new User("Ludi", "02633466095", "ludi@gremio.com", "pass1234", 'A');
-        Location location = new Location("-29.971155", "-51.19613");
-        java.util.Date date = new Date(2016, 10, 3);
 
-        Occurrence oc = new Occurrence(-1, usuario, location, "Vaca presa no poste, não sei como foi parar lá", date, pic, "URL", 'A');
+        Occurrence oc = pullOccurrenceDetails(pic);
+
 
 
         // constrói objeto json para envio
@@ -122,7 +120,7 @@ public class MainActivity extends AppCompatActivity
             occurrenceJson.put("location",oc.getLocation().toString());
             //occurrenceJson.put("image",imageBase64);
 
-            sendToServer(occurrenceJson);
+           // sendToServer(occurrenceJson);
         }
 
         catch ( Exception e )
@@ -200,5 +198,27 @@ public class MainActivity extends AppCompatActivity
         HttpPost post = new HttpPost("http://192.168.43.37:8080/Server/Occurrence");
         post.setEntity(new ByteArrayEntity(occurrenceJson.toString().getBytes("UTF8")));
         client.execute(post);
+    }
+
+    public Occurrence pullOccurrenceDetails(Bitmap pic)
+    {
+        Intent detailsActivity = new Intent(this, PhotoDetailsActivity.class);
+
+        Bundle inBundle = new Bundle();
+        inBundle.putParcelable("image",pic);
+        detailsActivity.putExtras(inBundle);
+
+        startActivityForResult(detailsActivity,1);
+
+        Bundle outBundle = detailsActivity.getExtras();
+
+        User usuario = new User("Ludi", "02633466095", "ludi@gremio.com", "pass1234", 'A');
+        Location location = new Location("-29.971155", "-51.19613");
+        java.util.Date date = new Date(2016, 10, 3);
+
+        Occurrence oc = new Occurrence(-1, usuario, location, "Vaca presa no poste, não sei como foi parar lá", date, pic, "URL", 'A');
+
+        return oc;
+
     }
 }
