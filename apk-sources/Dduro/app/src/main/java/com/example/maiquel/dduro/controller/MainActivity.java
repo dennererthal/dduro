@@ -5,9 +5,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -18,9 +20,21 @@ import com.example.maiquel.dduro.R;
 import com.example.maiquel.dduro.model.data.Location;
 import com.example.maiquel.dduro.model.data.Occurrence;
 import com.example.maiquel.dduro.model.data.User;
-import com.example.maiquel.dduro.view.OccurrenceListView;
 import com.example.maiquel.dduro.view.ListViewAdapter;
+import com.example.maiquel.dduro.view.OccurrenceListView;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -44,6 +58,11 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (android.os.Build.VERSION.SDK_INT > 9) {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+        }
+
 
         User usuario = new User("Geromel", "02633466095", "geromel@gremio.com", "pass1234", 'A');
         Location location = new Location("-29.971155", "-51.19613");
@@ -53,7 +72,7 @@ public class MainActivity extends AppCompatActivity
 
         Bitmap img = BitmapFactory.decodeResource(getResources(), R.drawable.vaca);
 
-        Occurrence ocurrence = new Occurrence(-1 ,usuario, location, "Vaca presa no poste, não sei como foi parar lá", date, img, "url da imagem", 'A');
+        Occurrence ocurrence = new Occurrence(-1, usuario, location, "Vaca presa no poste, não sei como foi parar lá", date, img, "url da imagem", 'A');
         occurrences.add(ocurrence);
 
 
@@ -74,8 +93,7 @@ public class MainActivity extends AppCompatActivity
         updateContent();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {   //método auto gerado
         super.onActivityResult(requestCode, resultCode, data);
 
@@ -86,7 +104,32 @@ public class MainActivity extends AppCompatActivity
         Location location = new Location("-29.971155", "-51.19613");
         java.util.Date date = new Date(2016, 10, 3);
 
-        Occurrence oc = new Occurrence(-1, usuario, location, "Vaca presa no poste, não sei como foi parar lá", date, pic,"URL", 'A');
+        Occurrence oc = new Occurrence(-1, usuario, location, "Vaca presa no poste, não sei como foi parar lá", date, pic, "URL", 'A');
+
+
+        // constrói objeto json para envio
+        JSONObject occurrenceJson = new JSONObject();
+
+        try
+        {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            pic.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+            byte[] byteArray = byteArrayOutputStream .toByteArray();
+            String imageBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
+
+            occurrenceJson.put("description", oc.getDescription());
+            occurrenceJson.put("date",oc.getDate().getTime());
+            occurrenceJson.put("location",oc.getLocation().toString());
+            //occurrenceJson.put("image",imageBase64);
+
+            sendToServer(occurrenceJson);
+        }
+
+        catch ( Exception e )
+        {
+            e.printStackTrace();
+        }
+
 
         occurrences.add(oc);
 
@@ -147,4 +190,15 @@ public class MainActivity extends AppCompatActivity
         super.onDestroy();
     }
 
+    public void sendToServer(JSONObject occurrenceJson) throws Exception
+    {
+        int TIMEOUT_MILLISEC = 10000;  // = 10 seconds
+        HttpParams httpParams = new BasicHttpParams();
+        httpParams.setParameter("occurrence", occurrenceJson);
+        HttpClient client = new DefaultHttpClient(httpParams);
+
+        HttpPost post = new HttpPost("http://192.168.43.37:8080/Server/Occurrence");
+        post.setEntity(new ByteArrayEntity(occurrenceJson.toString().getBytes("UTF8")));
+        client.execute(post);
+    }
 }
