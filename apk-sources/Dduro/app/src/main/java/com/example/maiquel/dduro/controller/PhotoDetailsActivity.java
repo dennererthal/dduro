@@ -20,7 +20,7 @@ public class PhotoDetailsActivity extends AppCompatActivity
 
         imageDetailsMiniature = (ImageView) findViewById(R.id.imageDetailsMiniature);
 
-        Bundle outBundle = this.getIntent().getExtras().getBundle(null);
+        Bundle outBundle = this.getIntent().getExtras().getBundle("bundle");
 
         Bitmap pic = (Bitmap) outBundle.get("image");
 

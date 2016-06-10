@@ -206,9 +206,9 @@ public class MainActivity extends AppCompatActivity
 
         Bundle inBundle = new Bundle();
         inBundle.putParcelable("image",pic);
-        detailsActivity.putExtras(inBundle);
+        detailsActivity.putExtra("bundle",inBundle);
 
-        startActivityForResult(detailsActivity,1);
+        startActivityForResult(detailsActivity,0);
 
         Bundle outBundle = detailsActivity.getExtras();
 
