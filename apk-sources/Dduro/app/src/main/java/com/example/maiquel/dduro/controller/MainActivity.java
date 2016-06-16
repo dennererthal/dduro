@@ -41,10 +41,10 @@ import java.util.Date;
 public class MainActivity extends AppCompatActivity
 {
 
-    ListView listview;
+    private ListView listview;
 
-    Button bt_dduro;
-    ImageView iv_camera;
+    private Button bt_dduro;
+    private ImageView iv_camera;
 
     private ArrayList<OccurrenceListView> beans;
     private ListViewAdapter listViewAdapter;
@@ -86,7 +86,6 @@ public class MainActivity extends AppCompatActivity
             {
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 startActivityForResult(intent, 0);
-
             }
         });
 

@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">D-Dure</string>
+
+    <string name="label_title">Título:</string>
+    <string name="label_local">Endereço:</string>
+    <string name="label_description">Descrição:</string>
 </resources>
