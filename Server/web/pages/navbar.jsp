@@ -5,6 +5,22 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="java.io.*,java.util.*" %>
+<%
+   // Get session creation time.
+   Date createTime = new Date(session.getCreationTime());
+   // Get last access time of this web page.
+   Date lastAccessTime = new Date(session.getLastAccessedTime());
+
+   String userIDKey = new String("userID");
+   String userID = new String("ABCD");
+
+   // Check if this is new comer on your web page.
+   if (session.isNew()){
+      session.setAttribute(userIDKey, userID);
+   } 
+   userID = (String)session.getAttribute(userIDKey);
+%>
 <!-- Navigation -->
     <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
     <div class="navbar-header">
@@ -40,18 +56,18 @@
     <div class="navbar-default sidebar" role="navigation">
         <div class="sidebar-nav navbar-collapse">
             <ul class="nav" id="side-menu">
-
+               
                 <li>
-                    <a href="occurrenceList.jsp"><i class="fa fa-dashboard fa-fw"></i> Ocorrências </a>
+                    <a href="occurrenceList.jsp"><i class="fa fa-list fa-fw"></i> Ocorrências </a>
                 </li>
                 <li>
                     <a href="#"><i class="fa fa-users fa-fw"></i> Usuários <span class="fa arrow"></span></a>
                     <ul class="nav nav-second-level">
                         <li>
-                            <a href="userForm.jsp"> Cadastro de usuários </a>
+                            <a href="userForm.jsp"><i class="fa fa-plus fa-fw"></i> Cadastro de usuários </a>
                         </li>
                         <li>
-                            <a href="userList.jsp"> Lista de usuários </a>
+                            <a href="userList.jsp"><i class="fa fa-list fa-fw"></i> Lista de usuários </a>
                         </li>
                     </ul>
                     <!-- /.nav-second-level -->

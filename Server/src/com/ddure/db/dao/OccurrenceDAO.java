@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.dduro.db.dao;
+package com.ddure.db.dao;
 
-import com.dduro.data.Occurrence;
-import com.dduro.db.Database;
-import com.dduro.schema.OccurrenceTable;
+import com.ddure.data.Occurrence;
+import com.ddure.db.Database;
+import com.ddure.schema.OccurrenceTable;
 import java.sql.SQLException;
 import java.util.List;
 
