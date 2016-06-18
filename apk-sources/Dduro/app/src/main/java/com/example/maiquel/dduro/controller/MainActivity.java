@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
 import android.view.View;
@@ -36,10 +37,10 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
-public class MainActivity extends AppCompatActivity
-{
+public class MainActivity extends AppCompatActivity {
 
     private ListView listview;
 
@@ -53,8 +54,8 @@ public class MainActivity extends AppCompatActivity
 
     Typeface font1, font2;
 
-    @Override protected void onCreate(Bundle savedInstanceState)
-    {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -80,10 +81,9 @@ public class MainActivity extends AppCompatActivity
         iv_camera = (ImageView) findViewById(R.id.iv_camera);
 
 
-        bt_dduro.setOnClickListener(new View.OnClickListener()
-        {
-            @Override public void onClick(View v)
-            {
+        bt_dduro.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 startActivityForResult(intent, 0);
             }
@@ -92,50 +92,79 @@ public class MainActivity extends AppCompatActivity
         updateContent();
     }
 
-    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {   //método auto gerado
-        super.onActivityResult(requestCode, resultCode, data);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {   //método auto gerado
+        if (requestCode == 0) {
 
-        Bitmap pic = (Bitmap) data.getExtras().get("data");
-        //iv_camera.setImageBitmap(pic);
+            super.onActivityResult(requestCode, resultCode, data);
+
+            Bitmap occurrenceImage = (Bitmap) data.getExtras().get("data");
+
+            Intent detailsActivity = new Intent(this, PhotoDetailsActivity.class);
+
+            Bundle inBundle = new Bundle();
+            inBundle.putParcelable("image", occurrenceImage);
+            detailsActivity.putExtra("bundle", inBundle);
+
+            startActivityForResult(detailsActivity, 1);
+
+        } else if (requestCode == 1) {
+            super.onActivityResult(requestCode, resultCode, data);
+
+            //obtem o bundle com os dados
+            Bundle outBundle = data.getExtras().getBundle("bundle");
+
+            String description = (String) outBundle.get("description");
+
+            //monta a imagem e converte pra BASE64
+            Bitmap occurrenceImage = (Bitmap) outBundle.get("image");
+            ByteArrayOutputStream bA_OutputStream = new ByteArrayOutputStream();
+            occurrenceImage.compress(Bitmap.CompressFormat.PNG, 100, bA_OutputStream);
+            byte[] byteArray = bA_OutputStream.toByteArray();
+            String encodedImage = Base64.encodeToString(byteArray, Base64.DEFAULT);
+
+            //monta o location
+            String latitude = (String) outBundle.get("location-lat");
+            String longetude = (String) outBundle.get("location-long");
+            Location location = new Location(latitude, longetude);
+
+            //monta o usuário TODO
+            User usuario = new User("Ludi", "02633466095", "ludi@gremio.com", "pass1234", 'A');
+
+            //monta a data
+            Calendar cal = Calendar.getInstance();
+            java.util.Date date = cal.getTime();
+
+            //monta a ocorrencia
+            Occurrence oc = new Occurrence(-1, usuario, location, description, date, occurrenceImage, encodedImage, 'A');
+
+            // constrói objeto json para envio
+            JSONObject occurrenceJson = new JSONObject();
+
+            try {
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                // occurrenceImage.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                byte[] bA = byteArrayOutputStream.toByteArray();
+                String imageBase64 = Base64.encodeToString(bA, Base64.DEFAULT);
+
+                occurrenceJson.put("description", oc.getDescription());
+                occurrenceJson.put("date", oc.getDate().getTime());
+                occurrenceJson.put("location", oc.getLocation().toString());
+                //occurrenceJson.put("image",imageBase64);
+
+                // sendToServer(occurrenceJson);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
 
-        Occurrence oc = pullOccurrenceDetails(pic);
+            occurrences.add(oc);
 
-
-
-        // constrói objeto json para envio
-        JSONObject occurrenceJson = new JSONObject();
-
-        try
-        {
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            pic.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-            byte[] byteArray = byteArrayOutputStream .toByteArray();
-            String imageBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT);
-
-            occurrenceJson.put("description", oc.getDescription());
-            occurrenceJson.put("date",oc.getDate().getTime());
-            occurrenceJson.put("location",oc.getLocation().toString());
-            //occurrenceJson.put("image",imageBase64);
-
-           // sendToServer(occurrenceJson);
+            updateContent();
         }
-
-        catch ( Exception e )
-        {
-            e.printStackTrace();
-        }
-
-
-        occurrences.add(oc);
-
-        updateContent();
-
     }
 
-    private void updateContent()
-    {
+    private void updateContent() {
         listview = (ListView) findViewById(R.id.listview);
         beans = new ArrayList<OccurrenceListView>();
 
@@ -146,8 +175,7 @@ public class MainActivity extends AppCompatActivity
 
         }*/
 
-        for ( int i = occurrences.size() - 1; i >= 0; i-- )
-        {
+        for (int i = occurrences.size() - 1; i >= 0; i--) {
             Occurrence oc = occurrences.get(i);
 
             OccurrenceListView occurrenceListView = new OccurrenceListView(oc.getImage(), oc.getDescription(), oc.getUser().toString(), oc.getDate().toString());
@@ -182,13 +210,12 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    @Override protected void onDestroy()
-    {
+    @Override
+    protected void onDestroy() {
         super.onDestroy();
     }
 
-    public void sendToServer(JSONObject occurrenceJson) throws Exception
-    {
+    public void sendToServer(JSONObject occurrenceJson) throws Exception {
         int TIMEOUT_MILLISEC = 10000;  // = 10 seconds
         HttpParams httpParams = new BasicHttpParams();
         httpParams.setParameter("occurrence", occurrenceJson);
@@ -197,27 +224,5 @@ public class MainActivity extends AppCompatActivity
         HttpPost post = new HttpPost("http://192.168.43.37:8080/Server/Occurrence");
         post.setEntity(new ByteArrayEntity(occurrenceJson.toString().getBytes("UTF8")));
         client.execute(post);
-    }
-
-    public Occurrence pullOccurrenceDetails(Bitmap pic)
-    {
-        Intent detailsActivity = new Intent(this, PhotoDetailsActivity.class);
-
-        Bundle inBundle = new Bundle();
-        inBundle.putParcelable("image",pic);
-        detailsActivity.putExtra("bundle",inBundle);
-
-        startActivityForResult(detailsActivity,0);
-
-        Bundle outBundle = detailsActivity.getExtras();
-
-        User usuario = new User("Ludi", "02633466095", "ludi@gremio.com", "pass1234", 'A');
-        Location location = new Location("-29.971155", "-51.19613");
-        java.util.Date date = new Date(2016, 10, 3);
-
-        Occurrence oc = new Occurrence(-1, usuario, location, "Vaca presa no poste, não sei como foi parar lá", date, pic, "URL", 'A');
-
-        return oc;
-
     }
 }

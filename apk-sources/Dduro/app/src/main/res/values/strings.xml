@@ -4,4 +4,8 @@
     <string name="label_title">Título:</string>
     <string name="label_local">Endereço:</string>
     <string name="label_description">Descrição:</string>
+
+    <string name="title_error">Erro</string>
+
+    <string name="msg_fill_description">Preencha uma descrição antes de prosseguir</string>
 </resources>

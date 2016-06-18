@@ -32,28 +32,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="@string/label_title"
-            android:id="@+id/label_title"
-            style="@style/White_Label"/>
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/textfield_title"
-            android:layout_gravity="center_horizontal"
-            android:textStyle="bold"
-            style="@style/Text_Imput"/>
-
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/label_local"
             android:id="@+id/label_local"
             style="@style/White_Label"/>
 
-        <EditText
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/textfield_local"
