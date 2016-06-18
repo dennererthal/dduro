@@ -16,7 +16,7 @@ public class User {
     private String cpf;
     private String email;
     private String password;
-    private char status;
+    private int status;
 
     /**
      * @return the id
@@ -91,14 +91,14 @@ public class User {
     /**
      * @return the status
      */
-    public char getStatus() {
+    public int getStatus() {
         return status;
     }
 
     /**
      * @param status the status to set
      */
-    public void setStatus(char status) {
+    public void setStatus(int status) {
         this.status = status;
     }
     

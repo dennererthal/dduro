@@ -14,7 +14,7 @@
         
     </head>
     <script language="javascript">
-        window.location.href = "pages/login.jsp"
+        window.location.href = "login.jsp"
     </script>
     <body>
         

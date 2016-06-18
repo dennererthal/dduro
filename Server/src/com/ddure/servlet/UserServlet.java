@@ -5,44 +5,62 @@
  */
 package com.ddure.servlet;
 
+import com.ddure.db.dao.UserDAO;
+import com.ddure.data.User;
 import java.io.IOException;
 import java.io.PrintWriter;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  *
  * @author herykgasparini
  */
-@WebServlet(name = "UserServlet", urlPatterns = {"/UserServlet"})
 public class UserServlet extends HttpServlet {
+
+    HttpServletRequest request;
+    HttpServletResponse response;
+    PrintWriter out;
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
      *
-     * @param request servlet request
-     * @param response servlet response
+     * @param req
+     * @param resp
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+    protected void processRequest(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet UserServlet</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet UserServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
+        req.setCharacterEncoding("UTF-8");
+        resp.setCharacterEncoding("UTF-8");
+
+        resp.setContentType("text/html;charset=UTF-8");
+
+        request = req;
+        response = resp;
+        out = resp.getWriter();
+
+        switch (request.getParameter("action")) {
+            case "login":
+                userAuthentication();
+                break;
+            case "logout":
+                userInvalidate();
+                break;
+            case "insertUser":
+                insertUser();
+                break;
+            case "alterUser":
+                alterUser();
+                break;
+            default:
+                break;
         }
     }
 
@@ -84,5 +102,76 @@ public class UserServlet extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    private void userAuthentication() {
+
+        User user = new UserDAO().getAuthentication(request.getParameter("cpf"), request.getParameter("password"));
+
+        if (user != null) {
+            HttpSession session = request.getSession();
+
+            session.setAttribute("userLogged", user);
+            encaminharPagina("occurrenceList.jsp");
+
+        } else {
+            request.setAttribute("wrongLogin", "error");
+            encaminharPagina("login.jsp");
+        }
+    }
+
+    private void userInvalidate() {
+        HttpSession session = request.getSession();
+        session.invalidate();
+
+        try {
+            response.sendRedirect("index.jsp");
+
+        } catch (Exception e) {
+            System.out.println("Erro desconectar: " + e);
+        }
+    }
+
+    private void insertUser() {
+
+        User u = new User();
+
+        u.setId(Integer.parseInt(request.getParameter("id")));
+        u.setName(request.getParameter("name"));
+        u.setEmail(request.getParameter("email").toLowerCase());
+        u.setPassword(request.getParameter("password"));
+        u.setCpf(request.getParameter("cpf"));
+        u.setStatus(Integer.parseInt(request.getParameter("status")));
+
+        if (new UserDAO().insertUser(u)) {
+
+            request.setAttribute("success", "userList.jsp");
+            encaminharPagina("userList.jsp");
+
+        } else {
+            request.setAttribute("error", "userForm.jsp");
+            encaminharPagina("userForm.jsp");
+        }
+    }
+
+    private void alterUser() {
+       
+
+        User u = new UserDAO().getUserById(Integer.parseInt(request.getParameter("id")));
+
+        if (u != null) {
+            request.setAttribute("user", u);
+            encaminharPagina("userForm.jsp");
+        }
+    }
+
+    // metodo generico que sempre sera chamado para encaminhar as paginas
+    private void encaminharPagina(String pagina) {
+        try {
+            RequestDispatcher rd = request.getRequestDispatcher(pagina);
+            rd.forward(request, response);
+        } catch (Exception e) {
+            System.out.println("Erro de encaminhamento = " + e);
+        }
+    }
 
 }
