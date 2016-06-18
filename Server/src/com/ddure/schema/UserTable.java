@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.dduro.schema;
+package com.ddure.schema;
 
-import com.dduro.data.User;
+import com.ddure.data.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;

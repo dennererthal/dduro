@@ -110,7 +110,7 @@
                             </div>
                             <!-- /.panel-body -->
                             <div class="panel-footer">
-                                <button type="button" class="btn btn-default"><i class="fa fa-search"></i> Listar</button>
+                                <a type="button" href="userList.jsp" class="btn btn-default"><i class="fa fa-search"></i> Listar</a>
                                 <button type="button" class="btn btn-default"><i class="fa fa-save"></i> Salvar</button>
                             </div>
                         </div>

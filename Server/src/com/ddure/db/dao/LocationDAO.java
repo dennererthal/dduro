@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.dduro.db.dao;
+package com.ddure.db.dao;
 
-import com.dduro.data.Location;
-import com.dduro.db.Database;
-import com.dduro.schema.LocationTable;
+import com.ddure.data.Location;
+import com.ddure.db.Database;
+import com.ddure.schema.LocationTable;
 
 /**
  *
