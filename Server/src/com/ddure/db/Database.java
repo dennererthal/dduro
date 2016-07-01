@@ -45,7 +45,7 @@ public class Database {
         try {
             Context initCtx = new InitialContext();
             Context envCtx = (Context) initCtx.lookup("java:comp/env");
-            DataSource ds = (DataSource) envCtx.lookup("jdbc/dduro");
+            DataSource ds = (DataSource) envCtx.lookup("jdbc/postgres");
             connection = ds.getConnection();
         } catch (NamingException | SQLException e) {
             e.printStackTrace();
@@ -66,9 +66,11 @@ public class Database {
     /**
      *
      * @param sql
+     * @return 
      */
-    public void executeUpdate(String sql) {
+    public int executeUpdate(String sql) {
         Statement stmt;
+        int result = -1;
         try {
             if (connection == null) {
                 throw new RuntimeException("Not connected to database!");
@@ -77,10 +79,12 @@ public class Database {
                 stablishConnection();
             }
             stmt = connection.createStatement();
-            stmt.executeUpdate(sql);
+            result = stmt.executeUpdate( sql, Statement.RETURN_GENERATED_KEYS );
         } catch (Exception e) {
             e.printStackTrace();
         }
+        
+        return result;
     }
 
     /**

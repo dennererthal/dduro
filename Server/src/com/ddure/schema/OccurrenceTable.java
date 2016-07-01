@@ -16,7 +16,7 @@ import java.util.List;
  * @author denner
  */
 public class OccurrenceTable {
-    public static final String name = "occurrency";
+    public static final String name = "occurrence";
     public static final class Columns {
         public static final String id = "id";
         public static final String ref_user = "ref_user";

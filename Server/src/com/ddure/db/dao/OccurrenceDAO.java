@@ -8,6 +8,7 @@ package com.ddure.db.dao;
 import com.ddure.data.Occurrence;
 import com.ddure.db.Database;
 import com.ddure.schema.OccurrenceTable;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -16,17 +17,10 @@ import java.util.List;
  * @author lucas
  */
 public class OccurrenceDAO {
-    public boolean insertOccurrence(Occurrence occurrence) {
+    public static boolean insertOccurrence(Occurrence occurrence) {
         Database db = Database.getInstance();
         try {
             String sql = "insert into " + OccurrenceTable.name + " "
-                    + "(" + OccurrenceTable.Columns.id + ","
-                    + OccurrenceTable.Columns.ref_user + " ,"
-                    + OccurrenceTable.Columns.ref_location + " ,"
-                    + OccurrenceTable.Columns.description + " ,"
-                    + OccurrenceTable.Columns.date + " ,"
-                    + OccurrenceTable.Columns.image + " ,"
-                    + OccurrenceTable.Columns.status + " )"
                     + " values "
                     + "(default,"
                     + occurrence.getRef_user() + ","
@@ -36,6 +30,14 @@ public class OccurrenceDAO {
                     + "'" + occurrence.getImage() + "',"
                     + "'" + occurrence.getStatus() + "')";
             db.executeUpdate(sql);
+            ResultSet rs = db.executeQuery( OccurrenceTable.select );
+            int cont = 0;
+            
+            while ( rs.next() ) {
+                cont = rs.getInt( "id" );
+            }
+            
+            occurrence.setId( cont );
         } catch (Exception e) {
             System.out.println("Erro ao inserir occurrence = " + e);
             return false;
@@ -45,7 +47,7 @@ public class OccurrenceDAO {
         return true;
     }
             
-    public boolean updateOccurrence(Occurrence occurrence) {
+    public static boolean updateOccurrence(Occurrence occurrence) {
         Database db = Database.getInstance();
         try {
             String sql = "update " + OccurrenceTable.name + " set "
@@ -91,7 +93,7 @@ public class OccurrenceDAO {
         }
     }
      
-    public List<Occurrence> getOccurrences() {
+    public static List<Occurrence> getOccurrences() {
         Database db = Database.getInstance();
         try {
             return OccurrenceTable.fetchMany(db.executeQuery(OccurrenceTable.select + " order by " + OccurrenceTable.Columns.id) );

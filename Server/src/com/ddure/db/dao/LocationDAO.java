@@ -8,24 +8,32 @@ package com.ddure.db.dao;
 import com.ddure.data.Location;
 import com.ddure.db.Database;
 import com.ddure.schema.LocationTable;
+import java.sql.ResultSet;
 
 /**
  *
  * @author lucas
  */
 public class LocationDAO {
-    public boolean insertLocation(Location location) {
+    public static boolean insertLocation(Location location) {
         Database db = Database.getInstance();
         
         try {
             String sql = "insert into " + LocationTable.name 
-                + "values (" + LocationTable.Columns.id + ","
-                + LocationTable.Columns.lat + " ,"
-                + LocationTable.Columns.lon + " lon) "
+                + " values "
                 + "(default,"
                 + "'" + location.getLat() + "',"
                 + "'" + location.getLon() + "')";
             db.executeUpdate( sql );
+            
+            ResultSet rs = db.executeQuery( LocationTable.select );
+            int cont = 0;
+            
+            while ( rs.next() ) {
+                cont = rs.getInt( "id" );
+            }
+            
+            location.setId( cont );
         } catch (Exception e) {
             System.out.println("Erro ao inserir location = " + e);
             return false;
