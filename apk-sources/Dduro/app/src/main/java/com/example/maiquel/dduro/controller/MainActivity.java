@@ -23,9 +23,14 @@ import com.example.maiquel.dduro.model.data.Occurrence;
 import com.example.maiquel.dduro.model.data.User;
 import com.example.maiquel.dduro.view.ListViewAdapter;
 import com.example.maiquel.dduro.view.OccurrenceListView;
+import com.google.gson.JsonObject;
+import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.ion.Ion;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -36,6 +41,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -69,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
         Location location = new Location("-29.971155", "-51.19613");
         java.util.Date date = new Date(2016, 5, 7);
         Drawable photo = getDrawable(R.drawable.vaca);
-
 
         Bitmap img = BitmapFactory.decodeResource(getResources(), R.drawable.vaca);
 

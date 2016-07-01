@@ -20,9 +20,28 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.internal.http.multipart.MultipartEntity;
 import com.example.maiquel.dduro.R;
+import com.example.maiquel.dduro.model.data.Occurrence;
+import com.example.maiquel.dduro.model.data.User;
+import com.google.gson.JsonObject;
+import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.ion.Ion;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.util.EntityUtils;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.text.DecimalFormat;
+import java.util.Date;
 
 public class PhotoDetailsActivity extends AppCompatActivity {
     private Button bt_dduro_details;
@@ -81,10 +100,16 @@ public class PhotoDetailsActivity extends AppCompatActivity {
                     outBundle.putString("location-long", occurrenceLocation.getLongitude());
                     outBundle.putString("description", textfield_description.getText().toString());
 
-                    Intent resultIntent = new Intent();
-                    resultIntent.putExtra("bundle", outBundle);
-                    setResult(Activity.RESULT_OK, resultIntent);
-                    finish();
+                    try {
+                        sendToServer();
+
+                        Intent resultIntent = new Intent();
+                        resultIntent.putExtra("bundle", outBundle);
+                        setResult(Activity.RESULT_OK, resultIntent);
+                        finish();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -131,5 +156,37 @@ public class PhotoDetailsActivity extends AppCompatActivity {
             }
         }
 
+    }
+
+    private void sendToServer() throws Exception {
+        //create image file
+        File f = new File(PhotoDetailsActivity.this.getApplicationContext().getCacheDir(), "tempFile");
+        f.createNewFile();
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        occurrencePic.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+        byte[] bitmapdata = bos.toByteArray();
+
+        //write the bytes in file
+        FileOutputStream fos = new FileOutputStream(f);
+        fos.write(bitmapdata);
+        fos.flush();
+        fos.close();
+
+        Ion.with(PhotoDetailsActivity.this.getApplicationContext())
+        .load("http://192.168.0.101:8080/Server/OccurrenceServlet")
+        .setMultipartParameter("action", "post")
+        .setMultipartParameter("userId", "1")
+        .setMultipartParameter("locationLat", occurrenceLocation.getLatitude())
+        .setMultipartParameter("locationLon", occurrenceLocation.getLongitude())
+        .setMultipartParameter("description", textfield_description.getText().toString())
+        .setMultipartFile("occurrenceImage", "image/png", f)
+        .asJsonObject()
+        .setCallback(new FutureCallback<JsonObject>() {
+            @Override
+            public void onCompleted(Exception e, JsonObject result) {
+                // do stuff with the result or error
+            }
+        });
     }
 }
